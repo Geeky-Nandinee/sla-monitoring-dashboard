@@ -5,12 +5,19 @@ let pool;
 
 function getPool() {
   if (!pool) {
+    const rawHost = (process.env.MYSQL_HOST || 'localhost').trim();
+    const rawUser = (process.env.MYSQL_USER || 'root').trim();
+    const rawPassword = (process.env.MYSQL_PASSWORD || '').trim();
+    const rawDatabase = (process.env.MYSQL_DATABASE || 'defaultdb').trim();
+    const rawPort = parseInt((process.env.MYSQL_PORT || '3306').trim(), 10);
+    const rawSsl = (process.env.MYSQL_SSL || 'false').trim().toLowerCase();
+
     const config = {
-      host: process.env.MYSQL_HOST || 'localhost',
-      port: parseInt(process.env.MYSQL_PORT || '3306', 10),
-      user: process.env.MYSQL_USER || 'root',
-      password: process.env.MYSQL_PASSWORD || '',
-      database: process.env.MYSQL_DATABASE || 'sla_monitoring',
+      host: rawHost,
+      port: isNaN(rawPort) ? 3306 : rawPort,
+      user: rawUser,
+      password: rawPassword,
+      database: rawDatabase,
       waitForConnections: true,
       connectionLimit: parseInt(process.env.MYSQL_CONNECTION_LIMIT || '10', 10),
       queueLimit: 0,
@@ -18,7 +25,7 @@ function getPool() {
       keepAliveInitialDelay: 0
     };
 
-    if (process.env.MYSQL_SSL === 'true') {
+    if (rawSsl === 'true' || rawSsl === '1') {
       config.ssl = { rejectUnauthorized: false };
     }
 
